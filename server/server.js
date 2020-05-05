@@ -21,6 +21,17 @@ server.use(bodyParser.json({ limit: '50mb', extended: true }))
 
 server.use(cookieParser())
 
+server.get('/api/v1/users', (req, res) => {
+  res.json({ name: 'Andrii'})
+  res.end()
+})
+
+server.get('/api/v1/users/:name', (req, res) => {
+  const { name } = req.params
+  res.json({ name })
+  res.end()
+})
+
 server.use('/api/', (req, res) => {
   res.status(404)
   res.end()
