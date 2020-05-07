@@ -5,7 +5,7 @@ import axios from 'axios'
 import cors from 'cors'
 import bodyParser from 'body-parser'
 import sockjs from 'sockjs'
-
+// const { readFile, writeFile, stat, unlink } = require("fs").promises;
 import cookieParser from 'cookie-parser'
 import Html from '../client/html'
 
@@ -16,16 +16,19 @@ const server = express()
 
 server.use(cors())
 
+const setHeaders = (req, res, next) => {
+  res.set('x-skillcrucial-user', 'b852a34a-a317-4c2d-bc22-e2183c2c25d0')
+  res.set('Access-Control-Expose-Headers', 'X-SKILLCRUCIAL-USER') 
+  return next()
+}
+
+server.use(setHeaders)
+
 server.use(express.static(path.resolve(__dirname, '../dist/assets')))
 server.use(bodyParser.urlencoded({ limit: '50mb', extended: true, parameterLimit: 50000 }))
 server.use(bodyParser.json({ limit: '50mb', extended: true }))
 
 server.use(cookieParser())
-
-server.get('/api/v1/users', async (req, res) => {
-  const { data: users } = await axios('https://jsonplaceholder.typicode.com/users')
-  res.json({ users })
-})
 
 server.get('/api/v1/users/take/:number', async (req, res) => {
   const { number } = req.params
@@ -38,7 +41,6 @@ server.get('/api/v1/users/take/:number', async (req, res) => {
 server.get('/api/v1/users/:name', (req, res) => {
   const { name } = req.params
   res.json({ name })
-
 })
 
 server.use('/api/', (req, res) => {
