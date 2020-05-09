@@ -8,7 +8,7 @@ import sockjs from 'sockjs'
 import cookieParser from 'cookie-parser'
 import Html from '../client/html'
 
-const { readFile, writeFile, unlink } = require('fs').promises
+const { readFile, writeFile} = require('fs').promises
 
 let connections = []
 
@@ -31,25 +31,25 @@ server.use(bodyParser.json({ limit: '50mb', extended: true }))
 
 server.use(cookieParser())
 
-const readFile = async () => {
-  return await readFile(`${__dirname}/test.json`, { encoding: "utf8" })  
+const saveF = async (users) => {
+  await writeFile(`${__dirname}/test.json`, JSON.stringify(users), { encoding: "utf8" }) 
+}
+
+const readF = async () => {
+  await readFile(`${__dirname}/test.json`, { encoding: "utf8" })  
   .then(data => { JSON.parse(data) })  
   .catch(async () => {  
   const { data: users } = await axios ('https://jsonplaceholder.typicode.com/users') 
-  await saveFile(users)
+  await saveF(users)
   return users  
   })  
 }
 
-const saveFile = async () => {
-  return await writeFile(`${__dirname}/test.json`, JSON.stringify(users), { encoding: "utf8" }) 
-}
-
 server.get('/api/v1/users/', async (req, res) => {
-  const users = await readFile()
+  const users = await readF()
   res.json({ users })
 })
-
+/*
 server.post('/api/v1/users/', async (req, res) => {
   const newUser = req.body
   res.json({ users })
@@ -67,7 +67,7 @@ server.patch('/api/v1/users/:userId', async (req, res) => {
 server.delete('/api/v1/users/:userId', async (req, res) => {
   res.json({ users })
 })
-
+*/
 server.use('/api/', (req, res) => {
   res.status(404)
   res.end()
