@@ -8,7 +8,7 @@ import sockjs from 'sockjs'
 import cookieParser from 'cookie-parser'
 import Html from '../client/html'
 
-const { readFile, writeFile} = require('fs').promises
+const { readFile, writeFile, unlink} = require('fs').promises
 
 let connections = []
 
@@ -32,42 +32,70 @@ server.use(bodyParser.json({ limit: '50mb', extended: true }))
 server.use(cookieParser())
 
 const saveF = async (users) => {
-  await writeFile(`${__dirname}/test.json`, JSON.stringify(users), { encoding: "utf8" }) 
+  const result = await writeFile(`${__dirname}/test.json`, JSON.stringify(users), { encoding: "utf8" }) 
+  return result
 }
 
 const readF = async () => {
-  await readFile(`${__dirname}/test.json`, { encoding: "utf8" })  
-  .then(data => { JSON.parse(data) })  
+  const result = await readFile(`${__dirname}/test.json`, { encoding: "utf8" })
+  .then(data => JSON.parse(data))
   .catch(async () => {  
   const { data: users } = await axios ('https://jsonplaceholder.typicode.com/users') 
   await saveF(users)
   return users  
-  })  
+  })
+  return result  
 }
 
 server.get('/api/v1/users/', async (req, res) => {
   const users = await readF()
   res.json({ users })
 })
-/*
-server.post('/api/v1/users/', async (req, res) => {
-  const newUser = req.body
-  res.json({ users })
+
+server.get('/api/v1/users/length', async (req, res) => {
+  const users = await readF()
+  // const usersLength = users.length
+  const newObj = {
+    'id' : users[users.length - 1].id + 1
+  }
+  const newArr = [...users, newObj]
+  // await saveF(users)
+  res.json({ 'length' : newArr[newArr.length - 1].id })
 })
 
 server.delete('/api/v1/users/', async (req, res) => {
   await unlink(`${__dirname}/test.json`) 
-  res.json({ users })
+  res.json({})
+})
+
+server.post('/api/v1/users/', async (req, res) => {
+  const users = await readF()
+  const newUser = req.body
+  newUser.id = users[users.length - 1].id + 1
+  const newArr = [...users, newUser]
+  await saveF(newArr)
+  res.json({ status: 'success', id: newUser.id })
 })
 
 server.patch('/api/v1/users/:userId', async (req, res) => {
-  res.json({ users })
+  const userId = req.params
+  const users = await readF()
+  const checkElement = users.map(it => it.id === +userId.userId)
+  if(checkElement){
+    checkElement.id = +userId.userId
+    await saveF(users)
+  }
+  res.json({ status: 'success', id: +userId.userId })
 })
 
 server.delete('/api/v1/users/:userId', async (req, res) => {
-  res.json({ users })
+  const userId = req.params
+  const users = await readF()
+  const checkElement = users.filter(it => it.id !== +userId.userId)
+  await saveF(checkElement)
+  res.json({ status: 'success', id: +userId.userId })
 })
-*/
+
 server.use('/api/', (req, res) => {
   res.status(404)
   res.end()
