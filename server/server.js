@@ -5,9 +5,10 @@ import axios from 'axios'
 import cors from 'cors'
 import bodyParser from 'body-parser'
 import sockjs from 'sockjs'
-// const { readFile, writeFile, stat, unlink } = require("fs").promises;
 import cookieParser from 'cookie-parser'
 import Html from '../client/html'
+
+const { readFile, writeFile, unlink } = require('fs').promises
 
 let connections = []
 
@@ -19,7 +20,7 @@ server.use(cors())
 const setHeaders = (req, res, next) => {
   res.set('x-skillcrucial-user', 'b852a34a-a317-4c2d-bc22-e2183c2c25d0')
   res.set('Access-Control-Expose-Headers', 'X-SKILLCRUCIAL-USER') 
-  return next()
+  next()
 }
 
 server.use(setHeaders)
@@ -30,17 +31,41 @@ server.use(bodyParser.json({ limit: '50mb', extended: true }))
 
 server.use(cookieParser())
 
-server.get('/api/v1/users/take/:number', async (req, res) => {
-  const { number } = req.params
+const readFile = async () => {
+  return await readFile(`${__dirname}/test.json`, { encoding: "utf8" })  
+  .then(data => { JSON.parse(data) })  
+  .catch(async () => {  
+  const { data: users } = await axios ('https://jsonplaceholder.typicode.com/users') 
+  await saveFile(users)
+  return users  
+  })  
+}
 
-  const { data: users } = await axios('https://jsonplaceholder.typicode.com/users')
-  const result = users.slice(0, +number)
-  res.json({ result })
+const saveFile = async () => {
+  return await writeFile(`${__dirname}/test.json`, JSON.stringify(users), { encoding: "utf8" }) 
+}
+
+server.get('/api/v1/users/', async (req, res) => {
+  const users = await readFile()
+  res.json({ users })
 })
 
-server.get('/api/v1/users/:name', (req, res) => {
-  const { name } = req.params
-  res.json({ name })
+server.post('/api/v1/users/', async (req, res) => {
+  const newUser = req.body
+  res.json({ users })
+})
+
+server.delete('/api/v1/users/', async (req, res) => {
+  await unlink(`${__dirname}/test.json`) 
+  res.json({ users })
+})
+
+server.patch('/api/v1/users/:userId', async (req, res) => {
+  res.json({ users })
+})
+
+server.delete('/api/v1/users/:userId', async (req, res) => {
+  res.json({ users })
 })
 
 server.use('/api/', (req, res) => {
