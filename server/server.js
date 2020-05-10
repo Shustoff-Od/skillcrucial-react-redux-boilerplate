@@ -66,7 +66,7 @@ server.get('/api/v1/users/test/:userId', async (req, res) => {
 })
 
 server.delete('/api/v1/users', async (req, res) => {
-  await unlink(`${__dirname}/test.json`) 
+  unlink(`${__dirname}/test.json`) 
   res.json({})
 })
 
