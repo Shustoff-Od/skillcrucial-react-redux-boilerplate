@@ -52,10 +52,17 @@ server.get('/api/v1/users', async (req, res) => {
   res.json( users )
 })
 
-server.get('/api/v1/users/length', async (req, res) => {
+server.get('/api/v1/users/test/:userId', async (req, res) => {
+  const { userId } = req.params
   const users = await readF()
-  // const newArr = [ users ]
-  res.json( users )
+  const checkId = users.map(function (it){
+    if (it.id === +userId){
+      return {...it, 'newfield' : 'newValue'}
+    }
+    return it
+  })
+  await saveF(checkId)
+  res.json({ id: +userId, users: checkId } )
 })
 
 server.delete('/api/v1/users', async (req, res) => {
@@ -75,21 +82,13 @@ server.post('/api/v1/users', async (req, res) => {
 server.patch('/api/v1/users/:userId', async (req, res) => {
   const { userId } = req.params
   const users = await readF()
-  let newArr
-  const checkId = users.reduce(
-    (acc, rec) => {
-      if(rec.id === +userId){
-        return {...rec, 'newfield' : 'newvalue' }
-      }
-      return acc
-    },
-    {}
-  )
-  if (checkId.id === +userId){
-    const deleteUser = users.filter(it => it.id !== +userId)
-    newArr = [...deleteUser, checkId]
-    await saveF(newArr)
-  }
+  const checkId = users.map(function (it){
+    if (it.id === +userId){
+      return {...it, 'newfield' : 'newValue'}
+    }
+    return it
+  })
+  await saveF(checkId)
   res.json({ status: 'success', id: +userId})
 })
 
