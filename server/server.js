@@ -38,7 +38,7 @@ const saveF = async (users) => {
 
 const readF = async () => {
   const result = await readFile(`${__dirname}/test.json`, { encoding: "utf8" })
-  .then(data => JSON.parse(data))
+  .then(data =>  JSON.parse(data))
   .catch(async () => {  
   const { data: users } = await axios ('https://jsonplaceholder.typicode.com/users') 
   await saveF(users)
@@ -49,18 +49,13 @@ const readF = async () => {
 
 server.get('/api/v1/users', async (req, res) => {
   const users = await readF()
-  res.json({ users })
+  res.json( users )
 })
 
 server.get('/api/v1/users/length', async (req, res) => {
   const users = await readF()
-  // const usersLength = users.length
-  const newObj = {
-    'id' : users[users.length - 1].id + 1
-  }
-  const newArr = [...users, newObj]
-  // await saveF(users)
-  res.json({ 'length' : newArr[newArr.length - 1].id })
+  // const newArr = [ users ]
+  res.json( users )
 })
 
 server.delete('/api/v1/users', async (req, res) => {
