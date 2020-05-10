@@ -82,10 +82,11 @@ server.post('/api/v1/users', async (req, res) => {
 server.patch('/api/v1/users/:userId', async (req, res) => {
   const { userId } = req.params
   const reqBody = req.body
+  reqBody.id = +userId
   const users = await readF()
   const checkId = users.map(function (it){
-    if (it.id === +userId){
-      return {...it, reqBody}
+    if (it.id === reqBody.id){
+      return {...it, ...reqBody}
     }
     return it
   })
