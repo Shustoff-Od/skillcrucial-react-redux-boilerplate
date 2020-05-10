@@ -47,7 +47,7 @@ const readF = async () => {
   return result  
 }
 
-server.get('/api/v1/users/', async (req, res) => {
+server.get('/api/v1/users', async (req, res) => {
   const users = await readF()
   res.json({ users })
 })
@@ -63,12 +63,12 @@ server.get('/api/v1/users/length', async (req, res) => {
   res.json({ 'length' : newArr[newArr.length - 1].id })
 })
 
-server.delete('/api/v1/users/', async (req, res) => {
+server.delete('/api/v1/users', async (req, res) => {
   await unlink(`${__dirname}/test.json`) 
   res.json({})
 })
 
-server.post('/api/v1/users/', async (req, res) => {
+server.post('/api/v1/users', async (req, res) => {
   const users = await readF()
   const newUser = req.body
   newUser.id = users[users.length - 1].id + 1
