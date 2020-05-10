@@ -93,11 +93,11 @@ server.patch('/api/v1/users/:userId', async (req, res) => {
 })
 
 server.delete('/api/v1/users/:userId', async (req, res) => {
-  const userId = req.params
+  const { userId } = req.params
   const users = await readF()
-  const checkElement = users.filter(it => it.id !== +userId.userId)
+  const checkElement = users.filter(it => it.id !== +userId)
   await saveF(checkElement)
-  res.json({ status: 'success', id: +userId.userId })
+  res.json({ status: 'success', id: +userId })
 })
 
 server.use('/api/', (req, res) => {
